@@ -42,6 +42,7 @@ class Message extends Notification
      */
     public function toMail($notifiable)
     {
+        // TODO: Customize email template
         return (new MailMessage)
                     ->from($this->details['from'])
                     ->subject($this->details['subject'])

@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Notifications\Message;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 
 class BroadcastController extends Controller
 {
@@ -25,66 +23,60 @@ class BroadcastController extends Controller
 
     public function send(Request $request)
     {
-        //$users = User::all();
-        ///*
-        $users = NULL;
+        $emails = NULL;
 
         if ($request['radio-input'] == "In Progress Projects")
         {
-            $users = DB::table('email')
+            $emails = DB::table('email')
                 ->join('collaborator','email.id','=','collaborator.email_id')
                 ->join('project','project.id','=','collaborator.project_id')
                 ->join('proposal','proposal.project_id','=','project.id')
-                ->whereRaw('proposal.created_at + INTERVAL (proposal.duration) DAY > CURRENT_DATE')
+                ->join('review','review.proposal_id','=','proposal.id')
+                ->where('review.response','=','accepted')
+                ->whereRaw( 'review.created_at + INTERVAL (proposal.duration) MONTH > CURRENT_DATE')
                 ->select('email.address')
                 ->distinct()
                 ->get();
         }
         else if ($request['radio-input'] == "Expired Projects")
         {
-            $users = DB::table('email')
+            $emails = DB::table('email')
                 ->join('collaborator','email.id','=','collaborator.email_id')
                 ->join('project','project.id','=','collaborator.project_id')
                 ->join('proposal','proposal.project_id','=','project.id')
-                ->whereRaw('proposal.created_at + INTERVAL (proposal.duration) DAY < CURRENT_DATE')
+                ->join('review','review.proposal_id','=','proposal.id')
+                ->where('review.response','=','accepted')
+                ->whereRaw( 'review.created_at + INTERVAL (proposal.duration) MONTH < CURRENT_DATE')
                 ->select('email.address')
                 ->distinct()
                 ->get();
         }
         else if ($request['radio-input'] == "All")
         {
-            $users = DB::table('email')
-                ->join('collaborator','email.id','=','collaborator.email_id')
-                ->join('project','project.id','=','collaborator.project_id')
-                ->join('proposal','proposal.project_id','=','project.id')
+            $emails = DB::table('email')
                 ->select('email.address')
                 ->distinct()
                 ->get();
         }
-        //*/
+
         $details=[
-            'from'=> 'email@test.com',
+            'from'=> 'email@test.com', // TODO: -- Email: Change from email
             'subject'=> $request['subject'],
             'body'=> $request['content']
         ];
 
-        //dd(User::all());
-        ///*
-        $users1 = collect(new User);
-        foreach($users as $user) {
-        $users1->add((new User)->forceFill(['email'=>$user->address]));
+        $message = new Message($details);
+
+        $users_collection = collect(new User);
+        foreach($emails as $email) {
+        $users_collection->add((new User)->forceFill(['email'=>$email->address]));
         }
 
-        //dd($users1);
-        $message = new Message($details);
-        //dd($users);
-
-        if ($users->isNotEmpty()) {
-            Notification::send($users1,$message);
-            //$users1->not
-//            foreach($users as $user) {
-//                (new User)->forceFill(['email'=>$user->address])->notify($message);
-//                //Notification::route('mail', $user->address)->notify(new Message($details));
+        if ($emails->isNotEmpty()) {
+            Notification::send($users_collection,$message);
+//            foreach($emails as $email) {
+//                (new User)->forceFill(['email'=>$user->address])->notify($message); // Anonymous function to create users on the fly
+//                Notification::route('mail', $user->address)->notify(new Message($details)); // On demand notification: takes only 1 email
 //            }
             return back()->with('status','success');
         }
@@ -92,12 +84,5 @@ class BroadcastController extends Controller
         {
             return back()->with('status','error');
         }
-
-        //*/
-
-        /*
-        Notification::send($users,new Message($details));
-        return back()->with('status','success');
-        */
     }
 }
