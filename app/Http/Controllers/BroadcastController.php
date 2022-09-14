@@ -102,7 +102,7 @@ class BroadcastController extends Controller
 
         // Broadcast emails
         if ($emails->isNotEmpty()) {
-            $flag = false;
+            $is_sent = false; // True when at least the broadcast was successfully received by 1 recipient
             try {
                 DB::beginTransaction();
                 $broadcast_id = DB::table('broadcast')->insertGetId([
@@ -114,22 +114,22 @@ class BroadcastController extends Controller
                         'email_id' => $email->id, 'broadcast_id' => $broadcast_id, 'status' => false,
                     ]);
                 }
-                DB::commit();
                 foreach ($emails as $email) {
                     // Send broadcast and update success recipients status
                     if (Mail::to($email->address)->send(new broadcastMessage($details)) instanceof \Illuminate\Mail\SentMessage) {
-                        $flag = true;
+                        $is_sent = true;
                         DB::table('broadcast_log')
                             ->where('email_id','=', $email->id)
                             ->where('broadcast_id','=', $broadcast_id)
                             ->update(['status' => true]);
                     }
                 }
+                DB::commit();
                 return back()->with('status', 'success');
             }
             catch (\Exception $e)
             {
-                if ($flag === false)
+                if ($is_sent === false)
                     DB::rollBack();
                 return back()->with('status','error');
             }
