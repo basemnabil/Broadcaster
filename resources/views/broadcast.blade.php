@@ -3,9 +3,9 @@
 @section('content')
 
     <div id="app">
-        <app status="{{ Session::get('status') }}">
+        <broadcaster status="{{ Session::get('status') }}">
             {{ csrf_field() }}
-        </app>
+        </broadcaster>
     </div>
 
 @endsection

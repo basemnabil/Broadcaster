@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/broadcast/create', [\App\Http\Controllers\BroadcastController::class, 'index'])->name('broadcast');
 Route::post('/broadcast',[\App\Http\Controllers\BroadcastController::class, 'send'])->name('send');
+Route::get('/broadcast/log', [App\Http\Controllers\BroadcastController::class, 'log'])->name('broadcastLog');
+Route::get('/broadcast/log/{id?}', [App\Http\Controllers\BroadcastController::class, 'log_details'])->name('log_details');
 
 Auth::routes();
 

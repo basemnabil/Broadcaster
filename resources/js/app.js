@@ -7,6 +7,9 @@
 import './bootstrap';
 import { createApp } from 'vue';
 
+// Vue Bootstrap
+import { BootstrapVue3 } from "bootstrap-vue-3";
+
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
  * registering components with the application instance so they are ready
@@ -15,15 +18,16 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
-import App from './components/app.vue';
-//import radioButton from "./components/radioButton.vue";
-//import VInput from "./components/input.vue";
-//import VTextarea from "./components/textarea.vue";
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
 
-app.component('app', App);
-//app.component('radioButton', radioButton);
-//app.component('v-input',VInput);
-//app.component('v-textarea',VTextarea);
+app.use(BootstrapVue3);
+
+import broadcaster from './components/broadcaster.vue';
+import broadcastLog from "./components/broadcastLog.vue";
+
+app.component('broadcaster', broadcaster);
+app.component('broadcastLog', broadcastLog);
 
 
 /**
@@ -31,7 +35,7 @@ app.component('app', App);
  * Vue components. It will recursively scan this directory for the Vue
  * components and automatically register them with their "basename".
  *
- * Eg. ./components/app.vue -> <example-component></example-component>
+ * Eg. ./components/broadcaster.vue -> <example-component></example-component>
  */
 
 // Object.entries(import.meta.globEager('./**/*.vue')).forEach(([path, definition]) => {

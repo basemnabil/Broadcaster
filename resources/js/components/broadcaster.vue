@@ -35,9 +35,8 @@ import VInput from "./input.vue";
 import VTextarea from "./textarea.vue";
 import Alert from "./alert.vue";
 
-
     export default {
-        name: 'app',
+        name: 'broadcaster',
         components: {Alert, VTextarea, VInput, radioButton},
         props:{
             'status': String,
@@ -49,8 +48,7 @@ import Alert from "./alert.vue";
                 subject: '',
                 body: '',
             },
-            //csrf: document.querySelector('meta[name="csrf_token"]').getAttribute('content'),
-        }),
+                }),
         mounted() {
             console.log('Component mounted.')
             if (this.status !== '')
